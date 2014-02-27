@@ -1,0 +1,184 @@
+
+
+/* ==========================================================================
+   Author's custom styles
+   ========================================================================== */
+
+@media (min-width: 768px) {
+  .navbar-nav .caret {
+    display: none;
+  }
+  .navbar-nav .open ul {
+    display: none;
+	}
+  .navbar-default .navbar-nav > .open > a,
+  .navbar-default .navbar-nav > .open > a:hover,
+  .navbar-default .navbar-nav > .open > a:focus,
+  .navbar-default .navbar-nav > .active > a,
+  .navbar-default .navbar-nav > .active > a:hover,
+  .navbar-default .navbar-nav > .active > a:focus {
+    color: #555;
+    background: none;
+  }
+  .navbar-inverse .navbar-nav > .open > a,
+  .navbar-inverse .navbar-nav > .open > a:hover,
+  .navbar-inverse .navbar-nav > .open > a:focus,
+  .navbar-inverse .navbar-nav > .active > a,
+  .navbar-inverse .navbar-nav > .active > a:hover,
+  .navbar-inverse .navbar-nav > .active > a:focus {
+    color: #969696;
+    background: none;
+  }
+  .navbar-default .navbar-nav > .hovernav > a {
+		color: #555;
+	}
+  .navbar-inverse .navbar-nav > .hovernav > a {
+		color: #969696;
+	}
+  .navbar-default .navbar-nav > .hovernav:hover > a,
+  .navbar-default .navbar-nav > .hovernav:hover > a:hover,
+  .navbar-default .navbar-nav > .hovernav:hover > a:focus {
+    color: #333;
+    background: transparent;
+  }
+  .navbar-inverse .navbar-nav > .hovernav:hover > a,
+  .navbar-inverse .navbar-nav > .hovernav:hover > a:hover,
+  .navbar-inverse .navbar-nav > .hovernav:hover > a:focus {
+    color: #fff;
+    background: transparent;
+  }
+	.navbar-default .navbar-nav > li:hover {
+    background: #e7e7e7;
+  }
+  .navbar-inverse .navbar-nav > li:hover {
+    background: #080808;
+  }
+  .navbar-nav .hovernav:hover > .dropdown-menu {
+    display: block;
+	}
+}
+/*Source: http://simonpadbury.com/bootstrap-3-navbar-dropdown-hover/*/
+
+/*template - start*/
+
+/*end - template*/
+
+/*start of left*/
+
+#left1
+{
+	float:left;
+	width:70%;
+}
+#carou1
+{
+	width:100%;
+	position:relative;
+	top:40px;
+	left:80px;
+	float:left;
+	overflow: hidden;
+	height:20em;
+}
+
+#img-car1
+{
+	width:95em;
+		margin:-4em 0 0 -2em ;
+
+}
+
+
+.link-pic:link,.link-pic:visited
+{
+display:block;
+font-weight:bold;
+color:#FFFFFF;
+width:31.2%;
+position:relative;
+left:0.5em;
+height:14.5em;
+float:left;
+text-align:center;
+padding:4px;
+text-decoration:none;
+}
+.link-pic:hover,.link-pic:active
+{
+opacity:0.8;
+}
+
+.title-link{
+	height:3em;
+	width:103%;
+	padding:10px;
+	position:relative;
+	top:-0.3em;
+	left:-0.3em;
+	background-color:RGB(0,73,112);
+	color:white;
+}
+
+#ics1
+{
+background-image:url('../img/ics.jpg');
+}
+
+#uplb1
+{
+background-image:url('../img/uplb.jpg');
+}
+
+#add1
+{
+background-image:url('../img/6.jpg');
+}
+
+#ics1, #uplb1, #add1{
+	background-repeat:no-repeat;
+	background-position:center; 
+	margin-left:0.5em;
+}
+
+.link-gr1
+{
+position:relative;
+margin-left:4.7em;
+top:50px;
+float:left;
+width:105%;
+}
+
+/*end of left*/
+
+/*start of right*/
+#right1
+{
+	width:28%;
+	float:right;
+}
+#signin
+{
+	width:250px;
+	float:right;
+	position:relative;
+	top:50px;
+	right:50px;
+}
+
+#announ1
+{
+	position:relative;
+	top:50px;
+
+}
+/*end of right*/
+
+#content{
+  clear:both;
+}
+
+/*  Overriding form-inline from bootstrap */
+.form-inline{
+  padding-left:1em;
+}
