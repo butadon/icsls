@@ -34,6 +34,53 @@ class Librarian_model extends CI_Model{
 	}//end of function get_all_references
 
 	/**
+	 * Basic search
+	*/
+	public function basic_get_reference($queryArray){
+		$this->db->select('id')
+				 ->from('reference_materials')
+				 ->like($queryArray['category'], $queryArray['searchText']);
+		return $this->db->get();
+	}//end of basic_get_reference
+
+	/**
+	 * Basic search
+	*/
+	public function basic_get_reference_fragment($queryArray, $offset){
+		$this->db->select('id, title, author, isbn, category, publisher, publication_year, access_type, course_code, total_available, total_stock, times_borrowed, for_deletion')
+				 ->from('reference_materials')
+				 ->like($queryArray['category'], $queryArray['searchText'])
+				 ->order_by($queryArray['sortBy'], $queryArray['orderFrom'])
+				 ->limit($queryArray['perPage'], $offset);
+
+		return $this->db->get();
+	}//end of basic_get_reference
+
+	public function advanced_search($projectionArray, $queryArray){
+		if(in_array('title', $projectionArray))
+			$this->db->like('title', $queryArray['title']);
+		if(in_array('author', $projectionArray))
+			$this->db->like('author', $queryArray['author']);
+		if(in_array('year_published', $projectionArray))
+			$this->db->like('publication_year', $queryArray['publication_year']);
+		if(in_array('publisher', $projectionArray))
+			$this->db->like('publisher', $queryArray['publisher']);
+		if(in_array('course_code', $projectionArray))
+			$this->db->like('course_code', $queryArray['course_code']);
+		if(in_array('category', $projectionArray))
+			$this->db->where('category', $queryArray['category']);
+
+		$this->db->select('id, title, author, isbn, category, publisher, publication_year, access_type, course_code, total_available, total_stock, times_borrowed, for_deletion')
+				 ->from('reference_materials');
+
+		return $this->db->get();
+	}
+
+	public function advanced_search_fragment($projectionArray, $queryArray, $offset){
+
+	}
+
+	/**
 	 * Returns the number of rows affected by the user's search input
 	 *
 	 * @access 	public
@@ -69,17 +116,17 @@ class Librarian_model extends CI_Model{
 		if($query_array['deletion'] != 'N')
 			$this->db->where('for_deletion', $query_array['deletion']);
 
-		$result = $this->db->get('reference_materials');
+		return $this->db->get('reference_materials')->num_rows();
 
-		return $result->num_rows();
+		//return $result->num_rows();
 	}//end of function get_number_of_rows
 
 	/**
 	 * Gets the results of the user's query limited by a range from the user
 	 *
 	 * @access 	public
-	 * @param 	array 	$query_array,
-	 * 			int 	$start
+	 * @param 	array 	$query_array
+	 * @param	int 	$start
 	 * @return 	object
 	*/
 	public function get_search_reference($query_array, $start){
@@ -148,27 +195,27 @@ class Librarian_model extends CI_Model{
 	 * @return 	object
 	*/
 	function get_ready_for_deletion(){
-		$sql = "SELECT id, title, author FROM reference_materials WHERE total_available = total_stock AND for_deletion = 'T'";
-		$query = $this->db->query($sql);
-		return $query;
+		$this->db->select('id, title, author')
+				 ->from('reference_materials')
+				 ->where('total_available = total_stock')
+				 ->where('for_deletion = \'T\'');
+		return $this->db->get()->result();
 		
 	}//end of functionget_ready_for_deletion
 	
 	//get the remaining books
 	function get_other_books($idready){
-		if(!empty($idready)){
-			$this->db->where_not_in('id',$idready);
-			return $this->db->get('reference_materials');
-		}else{
-			return $this->db->get('reference_materials');
-		}
+		if(! empty($idready))
+			$this->db->where_not_in('id', $idready);
+		
+		return $this->db->get('reference_materials');
 	}
 	
 	//Given array of selected books retrieve info
 	function get_selected_books($selected){
 		$info = array();
 		foreach($selected as $id):
-			$this->db->where('id',$id);
+			$this->db->where('id', $id);
 			$info[] = $this->db->get('reference_materials');
 		endforeach;
 		
@@ -195,13 +242,14 @@ class Librarian_model extends CI_Model{
      * Adds multiple references from the uploaded file to the database
      *
      * @access 	public
-     * @param 	array 	$data,
+     * @param 	array 	$data
      * 			int 	$count
     */
     public function add_multipleData($data, $count){
         for($i = 0; $i < $count; $i++) {
             $this->db->insert('reference_materials', $data[$i]);
         }
+        
 
         /*find a more efficient way to do this */
         $this->db->set('isbn',NULL);
@@ -228,19 +276,19 @@ class Librarian_model extends CI_Model{
      * @param 	array 	$query_array
     */
     public function edit_reference($query_array){
-      	$this->db->query("UPDATE reference_materials SET 
-      			title = '{$query_array['title']}', 
-      			author = '{$query_array['author']}', 
-      			isbn = '{$query_array['isbn']}', 
-      			category = '{$query_array['category']}', 
-      			publisher = '{$query_array['publisher']}', 
-      			publication_year = '{$query_array['publication_year']}', 
-      			access_type = '{$query_array['access_type']}', 
-      			course_code = '{$query_array['course_code']}', 
-      			description = '{$query_array['description']}', 
-      			total_stock = '{$query_array['total_stock']}' 
-      		WHERE id = {$query_array['id']}"
-      	);
+    	$this->db->where('id', $query_array['id']);
+    	$this->db->update('reference_materials', array(
+    		'title' => $query_array['title'],
+    		'author' => $query_array['author'],
+    		'isbn' => $query_array['isbn'],
+    		'category' => $query_array['category'],
+    		'publisher' => $query_array['publisher'],
+    		'publication_year' => $query_array['publication_year'],
+    		'access_type' => $query_array['access_type'],
+    		'course_code' => $query_array['course_code'],
+    		'description' => $query_array['description'],
+    		'total_stock' => $query_array['total_stock']
+    		));
     }//end of function edit_reference
 
     /**
@@ -263,36 +311,36 @@ class Librarian_model extends CI_Model{
 		$day = date('D');
 
 		/*returns rows of data from selected columns of the transaction log based on current date*/
-		if (strcmp($type,'daily')==0) {
-			$book_list = $this->db->query("Select reference_material_id, borrower_id, date_waitlisted, date_reserved, date_borrowed, date_returned from transactions where date_borrowed like CURDATE()");
-			$books_borrowed = $this->db->query("Select COUNT(DISTINCT reference_material_id) from transactions where date_borrowed like CURDATE()");
-			$books_not_borrowed = $this->db->query("Select COUNT(DISTINCT reference_material_id) from transactions where date_borrowed NOT LIKE CURDATE()");
+		if (strcmp($type, 'daily') == 0) {
+			$book_list = $this->db->query("SELECT reference_material_id, borrower_id, date_waitlisted, date_reserved, date_borrowed, date_returned FROM transactions WHERE date_borrowed LIKE CURDATE()");
+			$books_borrowed = $this->db->query("SELECT COUNT(DISTINCT reference_material_id) FROM transactions WHERE date_borrowed LIKE CURDATE()");
+			$books_not_borrowed = $this->db->query("SELECT COUNT(DISTINCT reference_material_id) FROM transactions WHERE date_borrowed NOT LIKE CURDATE()");
 /*			$most_borrowed = $this->db->query("Select reference_material_id, MAX(COUNT(date_borrowed)) from transactions where date_borrowed like CURDATE() group by date_borrowed");
 			$least_borrowed = $this->db->query("Select reference_material_id, MIN(COUNT(date_borrowed)) from transactions where date_borrowed like CURDATE() gro up by date_borrowed");
 */		} 
 		/*returns rows of data from selected columns of the transasction log based on the whole week
 		* can only be accessed on Fridays
 		*/
-		else if (strcmp($type,'weekly')==0 && $day=='Fri') {
-			$book_list = $this->db->query("Select reference_material_id, borrower_id, date_waitlisted, date_reserved, date_borrowed, date_returned from transactions where DATE_SUB(CURDATE(), INTERVAL 4 DAY)<=date_borrowed");	
-			$books_borrowed = $this->db->query("Select COUNT(DISTINCT reference_material_id) from transactions where DATE_SUB(CURDATE(), INTERVAL 4 DAY)<=date_borrowed");
-			$books_not_borrowed = $this->db->query("Select COUNT(DISTINCT reference_material_id) from transactions where DATE_SUB(CURDATE(), INTERVAL 4 DAY)<=date_borrowed")->result();
+		else if (strcmp($type,'weekly') == 0 && $day == 'Fri') {
+			$book_list = $this->db->query("SELECT reference_material_id, borrower_id, date_waitlisted, date_reserved, date_borrowed, date_returned FROM transactions WHERE DATE_SUB(CURDATE(), INTERVAL 4 DAY) <= date_borrowed");	
+			$books_borrowed = $this->db->query("SELECT COUNT(DISTINCT reference_material_id) FROM transactions WHERE DATE_SUB(CURDATE(), INTERVAL 4 DAY) <= date_borrowed");
+			$books_not_borrowed = $this->db->query("SELECT COUNT(DISTINCT reference_material_id) FROM transactions WHERE DATE_SUB(CURDATE(), INTERVAL 4 DAY) <= date_borrowed")->result();
 			
 /*			$most_borrowed = $this->db->query("Select reference_material_id, MAX(COUNT(date_borrowed)) from transactions where DATE_SUB(CURDATE(), INTERVAL 4 DAY)<=date_borrowed");
 			$least_borrowed = $this->db->query("Select reference_material_id, MIN(COUNT(date_borrowed)) from transactions where DATE_SUB(CURDATE(), INTERVAL 4 DAY)<=date_borrowed");
 */		} 
 		/*returns rows of data from selected columns of the transaction log based on the whole month*/
-		else if (strcmp($type,'monthly')==0) {
-			$book_list = $this->db->query("Select reference_material_id, borrower_id, date_waitlisted, date_reserved, date_borrowed, date_returned from transactions where MONTHNAME(date_borrowed) like MONTHNAME(CURDATE())");
-			$books_borrowed = $this->db->query("Select COUNT(DISTINCT reference_material_id) from transactions where MONTHNAME(date_borrowed) like MONTHNAME(CURDATE())");
+		else if (strcmp($type,'monthly') == 0) {
+			$book_list = $this->db->query("SELECT reference_material_id, borrower_id, date_waitlisted, date_reserved, date_borrowed, date_returned FROM transactions WHERE MONTHNAME(date_borrowed) LIKE MONTHNAME(CURDATE())");
+			$books_borrowed = $this->db->query("SELECT COUNT(DISTINCT reference_material_id) FROM transactions WHERE MONTHNAME(date_borrowed) LIKE MONTHNAME(CURDATE())");
 			
-			$books_not_borrowed = $this->db->query("Select COUNT(DISTINCT reference_material_id) from transactions where MONTHNAME(date_borrowed) like MONTHNAME(CURDATE())");
+			$books_not_borrowed = $this->db->query("SELECT COUNT(DISTINCT reference_material_id) FROM transactions WHERE MONTHNAME(date_borrowed) LIKE MONTHNAME(CURDATE())");
 /*			$most_borrowed = $this->db->query("Select reference_material_id, MAX(COUNT(date_borrowed)) from transactions where MONTHNAME(date_borrowed) like MONTHNAME(CURDATE())");
 			$least_borrowed = $this->db->query("Select reference_material_id, MIN(COUNT(date_borrowed)) from transactions where MONTHNAME(date_borrowed) like MONTHNAME(CURDATE())");
 */		}
-		$most_borrowed = $this->db->query("select * from reference_materials where times_borrowed = (select max(times_borrowed) from reference_materials) ")->result();
+		$most_borrowed = $this->db->query("SELECT * FROM reference_materials WHERE times_borrowed = (SELECT max(times_borrowed) FROM reference_materials) ")->result();
 		
-		if( $book_list!=NULL || $books_borrowed!=NULL || $books_not_borrowed!=NULL || $most_borrowed!=NULL){
+		if( $book_list != NULL OR $books_borrowed != NULL OR $books_not_borrowed != NULL OR $most_borrowed != NULL){
 		return $data = array('book_list' => $book_list,
 							 'books_borrowed' => $books_borrowed,
 							 'books_not_borrowed' => $books_not_borrowed,
@@ -317,8 +365,8 @@ class Librarian_model extends CI_Model{
 			t.reservation_due_date, t.date_borrowed, t.borrow_due_date, t.date_returned')
 			->from('users u, transactions t')
 			->where('t.reference_material_id', $referenceId)
-			->where('u.id = t.borrower_id');
-			//->where('t.date_returned != null');
+			->where('u.id = t.borrower_id')
+			->where('t.date_returned IS NULL');
 		return $this->db->get();
 	}//end of function get_transactions
 
@@ -341,8 +389,13 @@ class Librarian_model extends CI_Model{
 			$totalStock = $data->total_stock;
 		}
 
+		$currentDate = date('Y-m-d');
+		$dateParts = explode('-', $currentDate);
+		$dueDate = date('Y-m-d', mktime(0,0,0, $dateParts[1], $dateParts[2] + 3, $dateParts[0]));	//adds 3 days to the day of reservation
+
 		//Borrow Reference
 		if($flag === 'C'){
+			/*
 			//Increment times borrowed of a reference
 			$this->db->select('times_borrowed, total_available')
 					 ->from('reference_materials')
@@ -350,15 +403,16 @@ class Librarian_model extends CI_Model{
 			$timesBorrowedArray = $this->db->get()->result();
 			foreach ($timesBorrowedArray as $item) {
 				$timesBorrowed = $item->times_borrowed;
-				$totalAvailable = $item->total_available;
+				//$totalAvailable = $item->total_available;
 			}
 			$timesBorrowed++;
 			$totalAvailable--;
 			
 			$this->db->where('id', $referenceId);
-			$this->db->update('reference_materials', array('times_borrowed' => $timesBorrowed, 'total_available' => $totalAvailable));
+			$this->db->update('reference_materials', array('times_borrowed' => $timesBorrowed));
 
 			//Decrement borrow_limit
+			
 			$this->db->select('borrow_limit')
 					 ->from('users')
 					 ->where('id', $userId);
@@ -369,24 +423,21 @@ class Librarian_model extends CI_Model{
 			$newBorrowLimit--;
 			$this->db->where('id', $userId);
 			$this->db->update('users', array('borrow_limit' => $newBorrowLimit));
-
+			*/
 			//Update date_borrowed and borrow_due_date of transactions
-			$dateBorrowed = date('Y-m-d');
-			$dateParts = explode('-', $dateBorrowed);
-			$borrowDue = date('Y-m-d', mktime(0,0,0, $dateParts[1], $dateParts[2] + 3, $dateParts[0]));	//adds 3 days to the day of reservation
+			
 			$this->db->where('reference_material_id', $referenceId);
 			$this->db->where('borrower_id', $userId);
-			$this->db->update('transactions', array('date_borrowed' => date('Y-m-d'), 'borrow_due_date' => $borrowDue));
-		}
+			$this->db->update('transactions', array('date_borrowed' => $currentDate, 'borrow_due_date' => $dueDate));
+		}//end of if - Borrow Reference
 
 		//Return Reference
 		elseif ($flag === 'R' && $totalAvailable < $totalStock){
 			
 			//Update date returned of transactions
-			$dateReturned = date('Y-m-d');
 			$this->db->where('reference_material_id', $referenceId);
 			$this->db->where('borrower_id', $userId);
-			$this->db->update('transactions', array('date_returned' => $dateReturned));
+			$this->db->update('transactions', array('date_returned' => $currentDate));
 
 			//Increment borrow limit
 			$this->db->select('borrow_limit')
@@ -424,27 +475,39 @@ class Librarian_model extends CI_Model{
 					$newRank = $rank->waitlist_rank - 1;
 					//Update new rank and date waitlisted when first in line
 					if($newRank <= 0){
-						$dateBorrowed = date('Y-m-d');
-						$dateParts = explode('-', $dateBorrowed);
-						$borrowDue = date('Y-m-d', mktime(0,0,0, $dateParts[1], $dateParts[2] + 3, $dateParts[0]));	//adds 3 days to the day of reservation
 						$this->db->where('borrower_id', $user->borrower_id);
 						$this->db->update('transactions', array('waitlist_rank' => NULL, 
 							'date_waitlisted' => NULL, 
-							'date_reserved' => $dateBorrowed,
-							'reservation_due_date' => $borrowDue
+							'date_reserved' => $currentDate,
+							'reservation_due_date' => $dueDate
 							));
 
-						//Increment waitlist_limit
-						$this->db->select('waitlist_limit')
+						//Increment waitlist_limit, Decrement borrow_limit
+						$this->db->select('waitlist_limit, borrow_limit')
 								 ->from('users')
 								 ->where('id', $user->borrower_id);
-						$newWaitListLimitArray = $this->db->get()->result();
-						foreach ($newWaitListLimitArray as $wLimit) {
+						$newLimitArray = $this->db->get()->result();
+						foreach ($newLimitArray as $wLimit) {
 							$newWaitlistLimit = $wLimit->waitlist_limit;
+							$newBorrowLimit = $wLimit->borrow_limit;
+
 						}
 						$newWaitlistLimit++;
+						$newBorrowLimit--;
 						$this->db->where('id', $user->borrower_id);
-						$this->db->update('users', array('waitlist_limit' => $newWaitlistLimit));
+						$this->db->update('users', array('waitlist_limit' => $newWaitlistLimit, 'borrow_limit' => $newBorrowLimit));
+					
+						//Decrement total available
+						$this->db->select('total_available')
+								 ->from('reference_materials')
+								 ->where('id', $referenceId);
+						$newTotalAvailable = $this->db->get()->result();
+						foreach ($newTotalAvailable as $tAvailable) {
+							$totalAvailable = $tAvailable->total_available;
+						}
+						$totalAvailable--;
+						$this->db->where('id', $referenceId);
+						$this->db->update('reference_materials', array('total_available' => $totalAvailable));
 					}
 					//Decrement waitlist rank
 					else{
@@ -453,7 +516,7 @@ class Librarian_model extends CI_Model{
 					}
 				}
 			}
-		}
+		}//end of elseif - Return Reference
 	}
 
 }//end of Librarian_model

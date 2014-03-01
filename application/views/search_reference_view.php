@@ -9,189 +9,240 @@
 
 
 <div id="content">
-         <div class="col-sm-offset-1" id="search_top">
+	<div class="col-sm-offset-1" id="search_top">
 
-    <form action = "<?= base_url() . 'index.php/librarian/display_search_results' ?>" method = 'GET'>
+		<form action = "<?= base_url('index.php/librarian/search_reference') ?>" method = 'GET'>
+			<select  class="dropdown" name = 'category'>
+				<option value = 'title' <?php echo ($this->input->get('selectCategory') == 'title') ? "selected" : ""; ?>>Title</option>
+				<option value = 'author' <?php echo ($this->input->get('selectCategory') == 'author') ? "selected" : ""; ?>>Author</option>
+				<option value = 'isbn' <?php echo ($this->input->get('selectCategory') == 'isbn') ? "selected" : ""; ?>>ISBN</option>
+				<option value = 'course_code' <?php echo ($this->input->get('selectCategory') == 'course_code') ? "selected" : ""; ?>>Course Code</option>
+				<option value = 'publisher' <?php echo ($this->input->get('selectCategory') == 'publisher') ? "selected" : ""; ?>>Publisher</option>
+			</select>
+	      
+			<input type = 'text' name = 'searchText' pattern = '.{1,}' value = '<?= htmlspecialchars($this->input->get('searchText'), ENT_QUOTES) ?>'/>
+	  
+			<input type = 'submit' class="btn btn-primary" name = 'submit' value = 'Search' />
+			<a href="#advanceSearch" data-toggle="modal">
+				<input type="submit" name="aSearch" class="btn btn-primary"  value="Advanced Search"/>
+			</a>
+			<br />
+			<input type = 'submit' class="btn btn-primary" name = 'getAll' value = 'Display All References' />
+			<br />
+			<label>Sort By</label>
+			<select class = "dropdown" name = 'sortBy'>
+				<option value = 'title' <?= ($this->input->get('sortBy') == 'title') ? 'selected' : '' ?>>Title</option>
+				<option value = 'course_code' <?= ($this->input->get('sortBy') == 'course_code') ? 'selected' : '' ?>>Course Code</option>
+				<option value ='author' <?= ($this->input->get('sortBy') == 'author') ? 'selected' : '' ?>>Author</option>
+				<option value = 'category' <?= ($this->input->get('sortBy') == 'category') ? 'selected' : '' ?>>Category</option>
+				<option value = 'times_borrowed' <?= ($this->input->get('sortBy') == 'times_borrowed') ? 'selected' : '' ?>>Times Borrowed</option>
+			</select>
+			<label>Order</label>
+			<select class = "dropdown" name = 'orderFrom'>
+				<option value = 'ASC' <?= ($this->input->get('orderFrom') == 'ASC') ? 'selected' : '' ?>>From A - Z</option>
+				<option value = 'DESC' <?= ($this->input->get('orderFrom') == 'DESC') ? 'selected' : '' ?>>From Z - A</option>
+			</select>
+			<br />
+			<label>Results per page</label>
+			<select class = "dropdown" name = 'perPage'>
+				<option value = '10' <?= ($this->input->get('perPage') == '10') ? 'selected' : '' ?>>10</option>
+				<option value = '25' <?= ($this->input->get('perPage') == '25') ? 'selected' : '' ?>>25</option>
+				<option value = '50' <?= ($this->input->get('perPage') == '50') ? 'selected' : '' ?>>50</option>
+				<option value = '75' <?= ($this->input->get('perPage') == '75') ? 'selected' : '' ?>>75</option>
+				<option value = '100' <?= ($this->input->get('perPage') == '100') ? 'selected' : '' ?>>100</option>
+			</select>
+		</form>
+	</div>
 
-      <select  class="dropdown"name = 'selectCategory'>
-       <option value = 'title' <?php echo ($this->input->get('selectCategory') == 'title') ? "selected" : ""; ?>>Title</option>
-       <option value = 'author' <?php echo ($this->input->get('selectCategory') == 'author') ? "selected" : ""; ?>>Author</option>
-       <option value = 'isbn' <?php echo ($this->input->get('selectCategory') == 'isbn') ? "selected" : ""; ?>>ISBN</option>
-       <option value = 'course_code' <?php echo ($this->input->get('selectCategory') == 'course_code') ? "selected" : ""; ?>>Course Code</option>
-       <option value = 'publisher' <?php echo ($this->input->get('selectCategory') == 'publisher') ? "selected" : ""; ?>>Publisher</option>
-      </select>
-      
-      <input type = 'text' name = 'inputText' pattern = '.{1,}' value = '<?= htmlspecialchars($this->input->get('inputText'), ENT_QUOTES) ?>'/>
-  
-      <input type = 'submit' class="btn btn-primary" name = 'submit' value = 'Search' />
-      <a href="#advanceSearch"data-toggle="modal"> <input type="submit" name="aSearch" class="btn btn-primary"  value="Advanced Search"/></a>
-      <br />
-      <input type = 'hidden' name = 'all' value = 'FALSE' />
-      <input type = 'submit' class="btn btn-primary" name = 'getAll' value = 'Display All References' />
-  </div>
-  		
-
-  	<div id="advanceSearch" class="modal fade in" role="dialog">  
+	<div id="advanceSearch" class="modal fade in" role="dialog">  
 		<div class="modal-dialog">  
-          <div class="modal-content">
-            <div class="modal-header">  
-              <a class="close" data-dismiss="modal">&times;</a>
-            <h4>Advanced Search</h4>  
-            </div><!--modal header-->
-            <div class="modal-body">
-                <br />
-                   <label class = "btn btn-primary" for = 'likeRadio'>Like</label>
-                   <input type = 'radio' id = 'likeRadio' name = 'radioMatch' value = 'like' <?php echo ($this->input->get('radioMatch') != 'match') ? "checked" : ""; ?> />
-                   <label class = "btn btn-primary" for = 'matchRadio'>Exact Match</label>
-                  <input type = 'radio' id = 'matchRadio' name = 'radioMatch' value = 'match' <?php echo ($this->input->get('radioMatch') == 'match') ? "checked" : ""; ?> />
-                  <br />
-
-              <label><strong>Sort By:</strong></label>
-      <label class = "btn btn-primary" for = 'selectSortCategory'>Category:</label>
-      <select id = 'selectSortCategory' name = 'selectSortCategory'>
-        <option value = 'title' <?php echo ($this->input->get('selectSortCategory') == 'title') ? "selected" : ""; ?>>Title</option>
-        <option value = 'author' <?php echo ($this->input->get('selectSortCategory') == 'author') ? "selected" : ""; ?>>Author</option>
-        <option value = 'category' <?php echo ($this->input->get('selectSortCategory') == 'category') ? "selected" : ""; ?>>Reference Type</option>
-        <option value = 'course_code' <?php echo ($this->input->get('selectSortCategory') == 'course_code') ? "selected" : ""; ?>>Course Code</option>
-        <option value = 'times_borrowed' <?php echo ($this->input->get('selectSortCategory') == 'times_borrowed') ? "selected" : ""; ?>>Number of times borrowed</option>
-        <option value = 'total_stock' <?php echo ($this->input->get('selectSortCategory') == 'total_stock') ? "selected" : ""; ?>>Total stock</option>
-      </select>
-      <label class = "btn btn-primary" for = 'selectOrderBy'>Order:</label>
-      <select id = 'selectOrderBy' name = 'selectOrderBy'>
-        <option value = 'ASC' <?php echo ($this->input->get('selectOrderBy') == 'ASC') ? "selected" : ""; ?>>Ascending</option>
-        <option value = 'DESC' <?php echo ($this->input->get('selectOrderBy') == 'DESC') ? "selected" : ""; ?>>Descending</option>
-      </select>
-
-      <br />
-      <label><strong>Search only: </strong></label>
-      <br />
-      <label class = "btn btn-primary" for = 'selectAccessType'>Access Type: </label>
-      <select class = "btn btn-primary" id = 'selectAccessType' name = 'selectAccessType'>
-        <option value = 'N' <?php echo ($this->input->get('selectAccessType') == 'N') ? "selected" : ""; ?>></option>
-        <option value = 'F' <?php echo ($this->input->get('selectAccessType') == 'F') ? "selected" : ""; ?>>Faculty</option>
-        <option value = 'S' <?php echo ($this->input->get('selectAccessType') == 'S') ? "selected" : ""; ?>>Student</option>
-      </select>
-      <br />
-      <label class = "btn btn-primary" for = 'del'>Status</label>
-      <select id = 'del' name = 'checkDeletion'>
-        <option value = 'N' <?php echo ($this->input->get('checkDeletion') == 'N') ? "selected" : ""; ?>></option>
-        <option value = 'T' <?php echo ($this->input->get('checkDeletion') == 'T') ? "selected" : ""; ?>>To be Removed</option>
-        <option value = 'F' <?php echo ($this->input->get('checkDeletion') == 'F') ? "selected" : ""; ?>>Available</option>
-      </select>
-
-      <br />
-      <label class = "btn btn-primary" for = 'selectRows'>Rows per page</label>
-      <select id  = 'selectRows' name = 'selectRows'>
-        <option value = '10' <?php echo ($this->input->get('selectRows') == '10') ? "selected" : ""; ?>>10</option>
-        <option value = '20' <?php echo ($this->input->get('selectRows') == '20') ? "selected" : ""; ?>>20</option>
-        <option value = '50' <?php echo ($this->input->get('selectRows') == '50') ? "selected" : ""; ?>>50</option>
-        <option value = '100' <?php echo ($this->input->get('selectRows') == '100') ? "selected" : ""; ?>>100</option>
-      </select>
-      <br />
-              <div class="modal-footer">
-                <button class="btn btn-primary" name="search">Search</button>
-              </div> <!-- modal footer -->
-            </div>
-          </div>
-        </div>
-    </div>
-
-    </form>
-    <!-- End of Form for Searching Reference -->
- 
-		<!-- Display table for references not ready or not scheduled for deletion -->
-		<table id = 'booktable' border = '1'></table>
-		<!-- Form for displaying, deleting, and viewing searched references -->
-		<?php if($numResults > 0){ ?>
-			<form name = "forms" action = "<?= base_url() . 'index.php/librarian/delete_reference/' ?>" method = "POST">
-				<?php $offset = $this->input->get('per_page') ? $this->input->get('per_page') : 0; ?>
-				<?php $endOfPage = ($offset + $per_page < $numResults) ? ($offset + $per_page) : $numResults; ?>
-				<center><span><p>Retrieved <?= $numResults ?> references for "<?= htmlspecialchars($this->input->get('inputText'), ENT_QUOTES) ?>"</p></span></center>
-				<center><span><p>Retrieved <?= $offset + 1 ?> to <?= $endOfPage ?> of <?= $numResults ?></p></span></center>
-				<div id="paginationStyle"><?= $this->pagination->create_links() ?></div>
-				<table id = 'booktable' border = "1" cellpadding = "5" cellspacing = "2">
-					<thead>
-						<tr>
-							<th>
-								<button type = "button" class="btn btn-primary"  id = "markAll" value = "unmarked" alt = "Mark All" /><span class="glyphicon glyphicon-check"></span></button>
-								<button type = "submit" class="btn btn-primary" value = "Delete Selected" onclick = "return confirmDelete()" alt = "Delete Selected" /> <span class="glyphicon glyphicon-trash"></span> </button>
-								<br />
-							</th>
-							<th>Row</th>
-							<th>Course Code</th>
-							<th><center>Title</center></th>
-							<th>Author/s</th>
-							<th>Reference Type</th>
-							<th>Access Type</th>
-							<th>Times Borrowed</th>
-							<th>Current number</th>
-							<th>Status</th>
-						</tr>
-					</thead>
-					<tbody style = "text-align: center" >
-
-					<?php
-						
-						$rowID = 1 + $offset;
-						foreach($references as $r): ?>
+			<div class="modal-content">
+				<div class="modal-header">  
+					<a class="close" data-dismiss="modal">&times;</a>
+					<h4>Advanced Search</h4>  
+				</div><!--modal header-->
+				<form action="<?php echo base_url('index.php/librarian/advanced_search_reference'); ?>" method="get" accept-charset="utf-8">
+					<div class="modal-body">					
+						<table>
 							<tr>
-								<td><center><input type = "checkbox" class = "checkbox" name = "ch[]" value = '<?= $r->id ?>'/></center></td>
-								<td><?= $rowID++ ?></td>
-								<td><?= $r->course_code ?></td>
-								<td><?= (anchor(base_url() . 'index.php/librarian/view_reference/' . $r->id, $r->title)) ?></td>
-								<td><?= ($r->author) ?></td>
-								<td>
-									<?php
-										if($r->category == 'B')
-											echo 'Book';
-										else if($r->category == 'M')
-											echo 'Magazine';
-										else if($r->category == 'T')
-											echo 'Thesis';
-										else if($r->category == 'S')
-											echo 'Special Problem';
-										else if($r->category == 'C')
-											echo 'CD/DVD';
-										else if($r->category == 'J')
-											echo 'Journal';
-										?>
-								</td>
-								<td>
-									<?php
-										if($r->access_type == 'F')
-											echo 'Faculty';
-										else if($r->access_type == 'S')
-											echo 'Student';
-									?>
-								</td>
-								<td><?= $r->times_borrowed ?></td>
-								<td><?= $r->total_available . ' / ' . $r->total_stock ?></td>
-								<td>
-									<?php
-										if($r->for_deletion == 'F')
-											echo 'Available';
-										else if($r->for_deletion == 'T')
-											echo 'To be removed';
-									?>
+								<td align="right"><button class="btn btn-primary"><input value="title" type="checkbox" name="projection[]" <?php if(isset($temparray) && in_array('title',$temparray)) echo 'checked'; ?> >Title:</button></td>
+								<td align="right"><input type="text" class="form-control" name="title" size = "30" value="<?php if(isset($temparray) && in_array('title',$temparray)) echo $temparrayvalues[array_search('title', $temparray)]?>"><br/></td>
+							</tr>
+							<tr>
+								<td align="right"><button class="btn btn-primary"><input value="author" type="checkbox" name="projection[]" <?php if(isset($temparray) && in_array('author',$temparray)) echo 'checked'?>>Author:</button></td>
+								<td align="right"><input type="text" name="author" size = "30" class="form-control"value="<?php if(isset($temparray) && in_array('author',$temparray)) echo $temparrayvalues[array_search('author', $temparray)]?>"><br/></td>
+							</tr>
+							<tr>
+								<td align="right"><button class="btn btn-primary"><input value="year_published" type="checkbox" name="projection[]" <?php if(isset($temparray) && in_array('year_published',$temparray))  echo "checked";?> >Year Published:</button></td>
+								<td align="right"><input type="text" name="year_published" class="form-control"size = "30" value="<?php if(isset($temparray) && in_array('year_published',$temparray)) echo $temparrayvalues[array_search('year_published', $temparray)]?>"><br/></td>
+							</tr>
+							<tr>
+								<td align="right"><button class="btn btn-primary"><input value="publisher" type="checkbox" name="projection[]" <?php if(isset($temparray) && in_array('publisher',$temparray))  echo "checked" ?>>Publisher:</button></td>
+								<td align="right"><input type="text" name="publisher" class="form-control"size = "30" value="<?php if(isset($temparray) && in_array('publisher',$temparray)) echo $temparrayvalues[array_search('publisher', $temparray)]?>"><br/></td>
+							</tr>
+							<tr>
+								<td align="right"><button class="btn btn-primary"><input value="course_code" type="checkbox" name="projection[]" <?php if(isset($temparray) && in_array('course_code',$temparray)) echo"checked"?> >Subject:</button></td>
+								<td><input type="text" name="course_code"class="form-control" size = "30" value="<?php if(isset($temparray) && in_array('course_code',$temparray)) echo $temparrayvalues[array_search('course_code', $temparray)]?>"><br/></td>
+							</tr>
+							<tr>
+								<td align="right"><button class="btn btn-primary">Category:</button></td>
+								<td align="right">
+									<select class="form-control" name = 'category'>
+										<option value = "B">Book</option>
+										<option value = "J">Journal</option>
+										<option value = "T">Thesis</option>
+										<option value = "D">CD</option>
+										<option value = "C">Catalog</option>
+									</select><br/>
 								</td>
 							</tr>
-						<?php endforeach; ?>
-					</tbody>
-				</table>
-				<button type = "button" class="btn btn-primary"  id = "markAll" value = "unmarked" alt = "Mark All"  /><span class="glyphicon glyphicon-check"></span></button>
-				<button type = "submit" class="btn btn-primary" value = "Delete Selected" onclick = "return confirmDelete()" alt = "Delete Selected" /> <span class="glyphicon glyphicon-trash"></span> </button>
-				
-      				
-				<div id="paginationStyle"><?= $this->pagination->create_links() ?></div>
-			
-			
-				<center><span><p>Retrieved <?= $offset + 1 ?> to <?= $endOfPage ?> of <?= $numResults ?></p></span></center>
-				
-			</form>
-		<?php }
-	else { ?>
-	<center><span><p>No references for "<?= htmlspecialchars($this->input->get('inputText'), ENT_QUOTES) ?>"</p></span></center>
-	<?php } ?>
-		<!-- End of form for displaying, deleting, and viewing searched references -->
+							<tr>
+								<td align = 'right'><label>Sort By</label></td>
+								<td align = 'right'>
+									<select class = "dropdown" name = 'sortBy'>
+										<option value = 'title' <?= ($this->input->get('sortBy') == 'title') ? 'selected' : '' ?>>Title</option>
+										<option value = 'course_code' <?= ($this->input->get('sortBy') == 'course_code') ? 'selected' : '' ?>>Course Code</option>
+										<option value ='author' <?= ($this->input->get('sortBy') == 'author') ? 'selected' : '' ?>>Author</option>
+										<option value = 'category' <?= ($this->input->get('sortBy') == 'category') ? 'selected' : '' ?>>Category</option>
+										<option value = 'times_borrowed' <?= ($this->input->get('sortBy') == 'times_borrowed') ? 'selected' : '' ?>>Times Borrowed</option>
+									</select>
+								</td>
+							</tr>
+							<tr>
+								<td align = 'right'>
+									<label>Order</label>
+								</td>
+								<td align = 'right'>
+									<select class = "dropdown" name = 'orderFrom'>
+										<option value = 'ASC' <?= ($this->input->get('orderFrom') == 'ASC') ? 'selected' : '' ?>>From A - Z</option>
+										<option value = 'DESC' <?= ($this->input->get('orderFrom') == 'DESC') ? 'selected' : '' ?>>From Z - A</option>
+									</select>
+								</td>
+							</tr>
+							<tr>
+								<td align = 'right'><label>Results per page</label></td>
+								<td align = 'right'>
+									<select class = "dropdown" name = 'perPage'>
+										<option value = '10' <?= ($this->input->get('perPage') == '10') ? 'selected' : '' ?>>10</option>
+										<option value = '25' <?= ($this->input->get('perPage') == '25') ? 'selected' : '' ?>>25</option>
+										<option value = '50' <?= ($this->input->get('perPage') == '50') ? 'selected' : '' ?>>50</option>
+										<option value = '75' <?= ($this->input->get('perPage') == '75') ? 'selected' : '' ?>>75</option>
+										<option value = '100' <?= ($this->input->get('perPage') == '100') ? 'selected' : '' ?>>100</option>
+									</select>
+								</td>
+							</tr>
+						</table>
+					</div>
+					<div class="modal-footer">
+						<input  class="btn btn-primary"type="submit" value="Advanced Search" />
+					</div><!-- modal footer --> 
+				</form>	
+			</div>
 		</div>
+	</div>
+  		
+    <!-- End of Form for Searching Reference -->
+    <!-- displays the search results -->
+    <?php if(! empty($references)) { ?>
+   	<div>
+    	<form name = "forms" action = "<?= base_url('index.php/librarian/delete_reference/') ?>" method = "POST">
+			<?php $endOfPage = ($offset + $per_page < $totalAffected) ? ($offset + $per_page) : $totalAffected; ?>
+			<center>
+				<span>
+					<p>Retrieved <?= $totalAffected ?> references for "<?= htmlspecialchars($this->input->get('searchText'), ENT_QUOTES) ?>"</p>
+				</span>
+			</center>
+			<center>
+				<span>
+					<p>Retrieved <?= $offset + 1 ?> to <?= $endOfPage ?> of <?= $totalAffected ?></p>
+				</span>
+			</center>		
+			<div id="pagination_view">	
+				<?php echo $this->pagination->create_links(); ?>
+			</div>
+			<table id = 'booktable' class="table table-hover">
+				<thead>
+					<tr>
+						<th>
+							<button type = "button" class="btn btn-primary"  id = "markAll" value = "unmarked" alt = "Mark All" /><span class="glyphicon glyphicon-check"></span></button>
+							<button type = "submit" class="btn btn-primary" value = "Delete Selected" onclick = "return confirmDelete()" alt = "Delete Selected" /><span class="glyphicon glyphicon-trash"></span> </button>
+						</th>
+						<th>Course Code</th>
+						<th>
+							<center>Title</center>
+						</th>
+						<th>Author/s</th>
+						<th>Category</th>
+						<th>ISBN</th>
+						<th>Publisher</th>
+						<th>Publication Year</th>
+						<th>Access Type</th>
+						<th>Stock Count</th>
+						<th>Number of Times Borrowed</th>
+						<th>Reference Status</th>
+					</tr>
+				</thead>
+				<tbody style = "text-align: center" >
+				<?php	
+					foreach($references as $row): ?>
+						<tr>
+							<td><input type = 'checkbox' class = 'checkbox' name = 'ch[]' value = '<?= $row->id ?>' /></td>
+							<td><?= $row->course_code ?></td>
+							<td><?= anchor(base_url('index.php/librarian/view_reference/' . $row->id), $row->title) ?></td>
+							<td><?= $row->author ?></td>
+							<td>
+								<?php 
+									if($row->category == 'B')
+										echo 'Book';
+									elseif ($row->category == 'J')
+										echo 'Journal';
+									elseif($row->category == 'M')
+										echo 'Magazine';
+									elseif($row->category == 'C')
+										echo 'CD/DVD';
+									elseif($row->category == 'S')
+										echo 'Special Problem';
+									elseif($row->category == 'T')
+										echo 'Thesis';
+								?>
+							</td>
+							<td><?= $row->isbn = ($row->isbn != '') ? $row->isbn : 'N/A' ?></td>
+							<td><?= $row->publisher = ($row->publisher != '') ? $row->publisher : 'N/A' ?></td>
+							<td><?= $row->publication_year = ($row->publication_year != '') ? $row->publication_year : 'N/A' ?></td>
+							<td>
+								<?php 
+									if($row->access_type == 'S')
+										echo 'Student';
+									elseif ($row->access_type == 'F')
+										echo 'Faculty';
+								?>
+							</td>
+							<td><?= $row->total_available ?> / <?= $row->total_stock ?></td>
+							<td><?= $row->times_borrowed ?></td>
+							<td>
+								<?php
+									if($row->for_deletion == 'T')
+										echo 'To be removed';
+									elseif ($row->for_deletion == 'F')
+										echo 'Available';
+								?>
+							</td>
+						</tr>
+
+				<?php endforeach; ?>
+			</table>
+		</form>
+	<?php }
+
+	else{ ?>
+		<center>
+			<?php if($this->input->get('searchText') != '') {
+				echo 'No reference material found for "' . htmlspecialchars($this->input->get('searchText'), ENT_QUOTES) . '".';
+			} ?>
+		</center>
+		
+	<?php } ?>
+	</div>
+ 
+		
 <?= $this->load->view('includes/footer') ?>
